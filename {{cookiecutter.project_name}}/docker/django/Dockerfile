@@ -2,7 +2,7 @@
 # This Dockerfile uses multi-stage build to customize DEV and PROD images:
 # https://docs.docker.com/develop/develop-images/multistage-build/
 
-FROM python:3.9.13-slim-buster AS development_build
+FROM python:3.11.5-slim-bookworm AS development_build
 
 LABEL maintainer="{{ cookiecutter.project_domain }}"
 LABEL vendor="{{ cookiecutter.project_domain }}"
@@ -23,12 +23,11 @@ ENV DJANGO_ENV=${DJANGO_ENV} \
   PIP_NO_CACHE_DIR=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=1 \
   PIP_DEFAULT_TIMEOUT=100 \
-  # dockerize:
-  DOCKERIZE_VERSION=v0.6.1 \
+  PIP_ROOT_USER_ACTION=ignore \
   # tini:
   TINI_VERSION=v0.19.0 \
   # poetry:
-  POETRY_VERSION=1.2.1 \
+  POETRY_VERSION=1.6.1 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
@@ -48,11 +47,7 @@ RUN apt-get update && apt-get upgrade -y \
     gettext \
     git \
     libpq-dev \
-  # Installing `dockerize` utility:
-  # https://github.com/jwilder/dockerize
-  && curl -sSLO "https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" \
-  && tar -C /usr/local/bin -xzvf "dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" \
-  && rm "dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz" && dockerize --version \
+    wait-for-it \
   # Installing `tini` utility:
   # https://github.com/krallin/tini
   # Get architecture to download appropriate tini release:
@@ -89,13 +84,15 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   && poetry run pip install -U pip \
   && poetry install \
     $(if [ "$DJANGO_ENV" = 'production' ]; then echo '--only main'; fi) \
-    --no-interaction --no-ansi
+    --no-interaction --no-ansi --sync
 
 # This is a special case. We need to run this script as an entry point:
 COPY ./docker/django/entrypoint.sh /docker-entrypoint.sh
 
 # Setting up proper permissions:
-RUN chmod +x '/docker-entrypoint.sh'
+RUN chmod +x '/docker-entrypoint.sh' \
+  # Replacing line separator CRLF with LF for Windows users:
+  && sed -i 's/\r$//g' '/docker-entrypoint.sh'
 
 # Running as non-root user:
 USER web

@@ -9,6 +9,14 @@
 
 version: "3.8"
 services:
+  db:
+    image: "postgres:15-alpine"
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - postgresnet
+    env_file: ./config/.env
 
   web:
     <<: &web
@@ -32,6 +40,7 @@ services:
         - redis
       networks:
         - webnet
+        - postgresnet
       env_file: ./config/.env
       environment:
         DJANGO_DATABASE_HOST: db
@@ -61,6 +70,8 @@ services:
 #     command: python manage.py worker_process
 
 networks:
+  # Network for postgres, use it for services that need access to the db:
+  postgresnet:
   # Network for your internals, use it by default:
   webnet:
 

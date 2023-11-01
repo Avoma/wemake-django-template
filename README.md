@@ -9,7 +9,7 @@
 
 
 
-Bleeding edge `django3.2` template focused on code quality and security.
+Bleeding edge `django4.2` template focused on code quality and security.
 
 ---
 
@@ -22,7 +22,7 @@ Just like `django-admin.py startproject` but better.
 ## Features
 
 - Always [`up-to-date`](https://github.com/wemake-services/wemake-django-template/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot) with the help of [`@dependabot`](https://dependabot.com/)
-- Supports latest `python3.9+`
+- Supports latest `python3.11+`
 - [`poetry`](https://github.com/python-poetry/poetry) for managing dependencies
 - [`mypy`](https://mypy.readthedocs.io) and [`django-stubs`](https://github.com/typeddjango/django-stubs) for static typing
 - [`pytest`](https://pytest.org/) and [`hypothesis`](https://github.com/HypothesisWorks/hypothesis) for unit tests
@@ -35,7 +35,16 @@ Just like `django-admin.py startproject` but better.
 
 ## Installation
 
-Firstly, you will need to install [dependencies](https://cookiecutter.readthedocs.io/en/latest/):
+Firstly, you will need to install [dependencies](https://cookiecutter.readthedocs.io/en/latest/).
+
+The recommended way is via [`pipx`](https://github.com/pypa/pipx):
+
+```bash
+pipx install cookiecutter
+pipx inject cookiecutter jinja2-git
+```
+
+Or via global `pip`:
 
 ```bash
 pip install cookiecutter jinja2-git
@@ -51,10 +60,6 @@ cookiecutter gh:wemake-services/wemake-django-template
 ## Who is using this template?
 
 If you use our template, please add yourself or your company [in the list](https://github.com/wemake-services/wemake-django-template/wiki/Who-is-using-this-template).
-
-We offer free email support for anyone who is using this.
-If you have any problems or questions, drop us a line at [`contact@wemake.services`](mailto:contact@wemake.services).
-And we will try to help you.
 
 Here's a [nice list of real-life open-source usages](https://github.com/search?q=wemake-django-template&type=Code)
 of this template.
