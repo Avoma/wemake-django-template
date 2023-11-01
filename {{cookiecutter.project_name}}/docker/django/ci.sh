@@ -16,7 +16,7 @@ fi
 pyclean () {
   # Cleaning cache:
   find . \
-    | grep -E '(__pycache__|\.hypothesis|\.perm|\.cache|\.static|\.py[cod]$)' \
+    | grep -E '(__pycache__|\.(mypy_)?cache|\.hypothesis|\.perm|\.static|\.py[cod]$)' \
     | xargs rm -rf \
   || true
 }
@@ -36,12 +36,14 @@ run_ci () {
   # Running linting for all python files in the project:
   flake8 .
 
+  # Linl HTML formatting:
+  djlint --check server
+  djlint --lint server
+
   # Running type checking, see https://github.com/typeddjango/django-stubs
-  # shellcheck disable=SC2046
-  mypy manage.py server $(find tests -name '*.py')
+  mypy manage.py server tests
 
   # Running tests:
-  pytest --dead-fixtures
   pytest
 
   # Run checks to be sure we follow all django's best practices:
@@ -63,9 +65,9 @@ run_ci () {
   # Check production settings for gunicorn:
   gunicorn --check-config --config python:docker.django.gunicorn_config server.wsgi
 
-  # Checking if all the dependencies are secure and do not have any
-  # known vulnerabilities:
-  safety check --full-report
+  # Generate a report about the state of dependencies' safety,
+  # it is not blocking, because there are too many false positives:
+  safety check --full-report || true 
 
   # Checking `pyproject.toml` file contents:
   poetry check

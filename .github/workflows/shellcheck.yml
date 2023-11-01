@@ -7,22 +7,24 @@ on:
     paths:
       - 'tests/**/*.sh'
       - '{{cookiecutter.project_name}}/**/*.sh'
+      - '.github/workflows/shellcheck.yml'
   pull_request:
     paths:
       - 'tests/**/*.sh'
       - '{{cookiecutter.project_name}}/**/*.sh'
+      - '.github/workflows/shellcheck.yml'
   workflow_dispatch:
 
 concurrency:
-  group: shellcheck-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: ludeeus/action-shellcheck@1.1.0
+      - uses: actions/checkout@v4
+      - uses: ludeeus/action-shellcheck@2.0.0
         env:
           SHELLCHECK_OPTS: --shell bash
         with:

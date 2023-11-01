@@ -1,11 +1,11 @@
 # Logging
-# https://docs.djangoproject.com/en/3.2/topics/logging/
+# https://docs.djangoproject.com/en/4.2/topics/logging/
 
 # See also:
 # 'Do not log' by Nikita Sobolev (@sobolevn)
 # https://sobolevn.me/2020/03/do-not-log
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, final
 
 import structlog
 
@@ -29,6 +29,11 @@ LOGGING = {
             'processor': structlog.processors.KeyValueRenderer(
                 key_order=['timestamp', 'level', 'event', 'logger'],
             ),
+            'foreign_pre_chain': [
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.add_logger_name,
+                structlog.processors.TimeStamper(fmt='iso'),
+            ],
         },
     },
 
@@ -63,6 +68,7 @@ LOGGING = {
 }
 
 
+@final
 class LoggingContextVarsMiddleware(object):
     """Used to reset ContextVars in structlog on each request."""
 
